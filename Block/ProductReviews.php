@@ -99,7 +99,7 @@ class ProductReviews extends Template
             ->addStatusFilter(\Magento\Review\Model\Review::STATUS_APPROVED)
             ->addEntityFilter('product', $product_id);
         $review_count = count($ratingCollection);
-        if ($review_count) {
+        if ($review_count && $_ratingSummary->getSum() && $_ratingSummary->getCount()) {
             $product_rating = $_ratingSummary->getSum() / $_ratingSummary->getCount();
         } else {
             $product_rating = 0;
