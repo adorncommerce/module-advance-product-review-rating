@@ -2,7 +2,7 @@
     "name": "adorncommerce/module-advance-product-review-rating",
     "description": "Show advance reviews and ratings for products",
     "type": "magento2-module",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "license": [
         "proprietary"
      ],
