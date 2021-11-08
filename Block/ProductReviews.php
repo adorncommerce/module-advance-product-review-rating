@@ -37,6 +37,7 @@ class ProductReviews extends Template
     protected $_red = "red";
     protected $_orange = "orange";
     protected $_green = "green";
+    protected $reviewSummaryFactory;
 
     /**
      * ProductReviews constructor.
@@ -51,6 +52,7 @@ class ProductReviews extends Template
         CollectionFactory $reviewFactory,
         \Magento\Review\Model\Rating $ratingFactory,
         \Magento\Framework\Message\ManagerInterface $messgeManager,
+        \Magento\Review\Model\Review\SummaryFactory $reviewSummaryFactory,
         array $data = []
     )
     {
@@ -58,6 +60,7 @@ class ProductReviews extends Template
         $this->_reviewFactory = $reviewFactory;
         $this->_ratingFactory = $ratingFactory;
         $this->_messgeManager = $messgeManager;
+        $this->reviewSummaryFactory = $reviewSummaryFactory;
         parent::__construct($context, $data);
     }
 
@@ -99,10 +102,11 @@ class ProductReviews extends Template
             ->addStatusFilter(\Magento\Review\Model\Review::STATUS_APPROVED)
             ->addEntityFilter('product', $product_id);
         $review_count = count($ratingCollection);
-        if ($review_count && $_ratingSummary->getSum() && $_ratingSummary->getCount()) {
+        if ($review_count && $_ratingSummary->getCount() && $_ratingSummary->getSum()) {
             $product_rating = $_ratingSummary->getSum() / $_ratingSummary->getCount();
         } else {
-            $product_rating = 0;
+            $productR = $this->reviewSummaryFactory->create()->load($product_id);
+            $product_rating = $productR->getRatingSummary();
         }
         return $product_rating;
     }
@@ -131,7 +135,6 @@ class ProductReviews extends Template
             ->addEntityFilter('product', $pid)
             ->addStoreFilter($this->_storeManager->getStore()->getId())
             ->addFieldToSelect('review_id');
-
         $review->getSelect()->columns('detail.detail_id')->joinInner(
             ['vote' => $review->getTable('rating_option_vote')],
             'main_table.review_id = vote.review_id',

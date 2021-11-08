@@ -1,0 +1,40 @@
+"Admin Comment","Respuesta del administrador"
+"Admin Reply","Notificar al cliente"
+"Average Customer Rating:","Calificación promedio del cliente:"
+"Your Review","Su opinión"
+"Submitted on %1","Enviado el %1"
+"Back to My Reviews","Volver a mis reseñas"
+"Posted on","Publicado el"
+"Review by","Revisar por"
+"Write Your Own Review","Escriba su propia reseña"
+"* Required Fields","* Campos obligatorios"
+"You're reviewing:","Estás revisando:"
+"Your Rating","Tu calificación"
+"%1 %2","%1 %2"
+Nickname,Apodo
+Summary,resumen
+Review,revisión
+"Submit Review","Enviar revisión"
+"Customer Reviews","Reseñas de clientes"
+"Write a Review","Escribe una reseña"
+"Reviews & Rating","Reseñas y calificación"
+"Total %1 reviews","Total %1 reseñas"
+"of customers recommended this product","de los clientes recomendaron este producto"
+"Thanks for review","Gracias por revisar"
+"Dear %customer_name,","Estimado% customer_name",
+"%title,","%título,"
+"%customer_review,","%customer_review",
+"Review Status : ","Estado de revisión:"
+%review_status,%eview_status
+"%admin_reply,","%admin_reply",
+"Store has received new review for below product.","La tienda ha recibido una nueva revisión para el producto a continuación".
+Continue,Continuar
+"Product Reviews And Rating","Reseñas y valoraciones de productos"
+"Product Reviews And Rating Configuration","Revisiones de productos y configuración de calificaciones"
+"Module Enable","Módulo habilitado"
+"Star Color","Color de estrella"
+"Graphic Circle","Círculo gráfico"
+"Reviews And Rating Recipient Email","Correo electrónico del destinatario de reseñas y calificación"
+"Select Product Review Admin Email Template","Seleccionar plantilla de correo electrónico de administrador de revisión de producto"
+"Select Owner Reply Email Template","Seleccionar plantilla de correo electrónico de respuesta del propietario"
+"Popup Enable","Ventana emergente habilitada"
