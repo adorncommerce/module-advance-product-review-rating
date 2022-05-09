@@ -14,7 +14,7 @@ require(
             var options = {
                 type: 'popup',
                 responsive: true,
-                innerScroll: false,
+                innerScroll: true,
                 buttons: [{
                     text: $.mage.__('Continue'),
                     class: 'mymodal1',
@@ -29,6 +29,25 @@ require(
                 $(".modal-footer").hide();
             });
         }
-
+        $("#product_review_image").on('change', function () {
+            $(".review-thumbnail").empty();
+            for (let i = 0; i < this.files.length; ++i) {
+                let filereader = new FileReader();
+                if (this.files[0].size > 2000000){
+                    $('#size-error').html($.mage.__('Please upload file less than 2MB. Thanks!!'));
+                    $('#review-btn').prop('disabled', true);
+                    return false;
+                }else {
+                    $('#size-error').html('');
+                    $('#review-btn').prop('disabled', false);
+                }
+                let $img = jQuery.parseHTML("<div class='review-photo'></div>");
+                filereader.onload = function () {
+                    $img[0].style.backgroundImage = 'url(' +this.result+')';
+                };
+                filereader.readAsDataURL(this.files[i]);
+                $(".review-thumbnail").append($img);
+            }
+        });
     }
 );

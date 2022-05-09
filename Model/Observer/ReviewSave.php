@@ -7,6 +7,12 @@
 namespace Adorncommerce\ProductReviewRating\Model\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Message\ManagerInterface;
+use Magento\Review\Model\Review\StatusFactory;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\MediaStorage\Model\File\UploaderFactory;
+use Magento\Framework\Image\AdapterFactory;
+use Magento\Framework\Filesystem;
 
 /**
  * Class ReviewSave
@@ -40,13 +46,15 @@ class ReviewSave implements ObserverInterface
      */
     protected $_customerFactory;
     /**
-     * @var \Magento\Framework\Message\ManagerInterface
+     * @var ManagerInterface
      */
     protected $_messageManager;
     /**
-     * @var \Magento\Review\Model\Review\StatusFactory
+     * @var StatusFactory
      */
     protected $_statusFactory;
+
+    protected $request;
 
     /**
      * ReviewSave constructor.
@@ -56,8 +64,8 @@ class ReviewSave implements ObserverInterface
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Adorncommerce\ProductReviewRating\Helper\Data $helperData
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
-     * @param \Magento\Framework\Message\ManagerInterface $messageManager
-     * @param \Magento\Review\Model\Review\StatusFactory $statusFactory
+     * @param ManagerInterface $messageManager
+     * @param StatusFactory $statusFactory
      */
     public function __construct(
         \Magento\Framework\App\ResourceConnection $resource,
@@ -66,9 +74,14 @@ class ReviewSave implements ObserverInterface
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Adorncommerce\ProductReviewRating\Helper\Data $helperData,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
-        \Magento\Framework\Message\ManagerInterface $messageManager,
-        \Magento\Review\Model\Review\StatusFactory $statusFactory
-    ) {
+        ManagerInterface $messageManager,
+        StatusFactory $statusFactory,
+        UploaderFactory $uploaderFactory,
+        AdapterFactory $adapterFactory,
+        Filesystem $filesystem,
+        \Magento\Framework\App\Request\Http $request
+    )
+    {
         $this->_resource = $resource;
         $this->transportBuilder = $transportBuilder;
         $this->_storeManager = $storeManager;
@@ -77,6 +90,10 @@ class ReviewSave implements ObserverInterface
         $this->_customerFactory = $customerFactory;
         $this->_messageManager = $messageManager;
         $this->_statusFactory = $statusFactory;
+        $this->uploaderFactory = $uploaderFactory;
+        $this->adapterFactory = $adapterFactory;
+        $this->filesystem = $filesystem;
+        $this->request = $request;
     }
 
     /**
@@ -92,22 +109,21 @@ class ReviewSave implements ObserverInterface
             $currentAreacode = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Framework\App\State')->getAreaCode();
             $review = $observer->getEvent()->getDataObject();
             if ($currentAreacode == 'adminhtml') {
-                    $connection = $this->_resource;
-                    $tableName = $connection->getTableName('review_detail');
-                    $detail = [
-                        'admin_reply' => $review->getAdminReply(),
-                    ];
-                    $select = $connection->getConnection()->select()->from($tableName)->where('review_id = :review_id');
-                    $detailId = $connection->getConnection()->fetchOne($select, [':review_id' => $review->getId()]);
-                    if ($detailId) {
-                        $condition = ["detail_id = ?" => $detailId];
-                        $connection->getConnection()->update($tableName, $detail, $condition);
-                    } else {
-                        $detail['store_id'] = $review->getStoreId();
-                        $detail['customer_id'] = $review->getCustomerId();
-                        $detail['review_id'] = $review->getId();
-                        $connection->getConnection()->insert($tableName, $detail);
-                    }
+                $connection = $this->_resource;
+                $tableName = $connection->getTableName('review_detail');
+                $detail = [
+                    'admin_reply' => $review->getAdminReply()
+                ];
+                $select = $connection->getConnection()->select()->from($tableName)->where('review_id = :review_id');
+                $detailId = $connection->getConnection()->fetchOne($select, [':review_id' => $review->getId()]);
+                if ($detailId) {
+                    $condition = ["detail_id = ?" => $detailId];
+                    $connection->getConnection()->update($tableName, $detail, $condition);
+                } else {
+                    $detail['store_id'] = $review->getStoreId();
+                    $detail['customer_id'] = $review->getCustomerId();
+                    $detail['review_id'] = $review->getId();
+                    $connection->getConnection()->insert($tableName, $detail);
                 }
                 $statusFact = $this->_statusFactory->create()->load($review->getStatusId());
                 if ($review['notify_customer'] == true && $review->getCustomerId()) {
@@ -121,12 +137,13 @@ class ReviewSave implements ObserverInterface
                     $templateId = $this->_helperData->getAdminReplyEmailTemplate();
                     $from = $this->_helperData->getRecipientEmail();
                     $template = $this->transportBuilder->setTemplateIdentifier($templateId)
-                            ->setTemplateOptions(['area' => 'frontend', 'store' => $store->getId()])
-                            ->setTemplateVars($templateVars)
-                            ->setFrom($from)
-                            ->addTo($customer->getEmail(), $customer->getName())
-                            ->getTransport();
+                        ->setTemplateOptions(['area' => 'frontend', 'store' => $store->getId()])
+                        ->setTemplateVars($templateVars)
+                        ->setFrom($from)
+                        ->addTo($customer->getEmail(), $customer->getName())
+                        ->getTransport();
                     $template->sendMessage();
+                }
             } else {
                 $store = $this->_storeManager->getStore();
                 $templateVars['customer_name'] = $review['nickname'];

@@ -13,7 +13,7 @@
         <div class="block-content">
             <?php if ($block->getAllowWriteReviewFlag()): ?>
                 <form action="<?= $block->escapeUrl($block->getAction()) ?>" class="review-form" method="post"
-                      id="review-form" data-role="product-review-form" data-bind="scope: 'review-form'">
+                      id="review-form" data-role="product-review-form" data-bind="scope: 'review-form'" enctype="multipart/form-data">
                     <?= $block->getBlockHtml('formkey') ?>
                     <?= $block->getChildHtml('form_fields_before') ?>
                     <fieldset class="fieldset review-fieldset"
@@ -85,10 +85,19 @@
                                           data-validate="{required:true}" data-bind="value: review().detail"></textarea>
                             </div>
                         </div>
+                        <div class="field review-field-image">
+                            <label for="image" class="label"><span><?= $block->escapeHtml(__('Image')) ?></span></label>
+                            <div class="control">
+                                <input type="file" name="image[]" id="product_review_image" accept="image/*" multiple="multiple" />
+                            </div>
+                            <span id="size-error"></span>
+                        </div>
+                        <div class="review-thumbnail">
+                        </div>
                     </fieldset>
                     <div class="actions-toolbar review-form-actions">
                         <div class="primary actions-primary">
-                            <button type="submit" class="action submit primary">
+                            <button type="submit" id="review-btn" class="action submit primary">
                                 <span><?= $block->escapeHtml(__('Submit Review')) ?></span></button>
                         </div>
                     </div>

@@ -45,8 +45,9 @@ $_review = $block->getReviewsCollection($this->getReviewId());
                         </div>
                         <li class="item review-item" itemscope itemprop="review" itemtype="http://schema.org/Review">
                             <div class="review-title"
-                                 itemprop="name"><?= $block->escapeHtml($_review->getTitle()) ?></div>
+                                 itemprop="name"><span>Summary of Review : </span><?= $block->escapeHtml($_review->getTitle()) ?></div>
                             <div class="review-content" itemprop="description">
+                                <span>Customer Review :</span>
                                 <?= /* @noEscape */nl2br($block->escapeHtml($_review->getDetail())) ?>
                             </div>
 

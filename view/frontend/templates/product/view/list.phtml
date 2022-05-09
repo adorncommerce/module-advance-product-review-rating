@@ -8,10 +8,13 @@
 /** @var Magento\Review\Block\Product\View\ListView $block */
 /** @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer */
 $helper = $this->helper('Adorncommerce\ProductReviewRating\Helper\Data');
+$review_image = $helper->getImages($block->getProductId());
 $_items = $block->getReviewsCollection()->getItems();
 $format = $block->getDateFormat() ?: \IntlDateFormatter::SHORT;
 $voteAvg = 0;
+$directoryPath = $this->getUrl('pub/media/product_review_image');
 ?>
+<link rel="stylesheet" type="text/css" href="<?php echo $block->getViewFileUrl('Adorncommerce_ProductReviewRating::css/lightgallery.min.css') ?>">
 <link rel="stylesheet" type="text/css"
       href="<?php echo $block->getViewFileUrl('Adorncommerce_ProductReviewRating::css/jquery.rateyo.min.css') ?>">
 <div class="block review-list-adrn" id="customer-reviews">
@@ -31,14 +34,30 @@ $voteAvg = 0;
             <?= $block->getChildHtml('toolbar') ?>
         </div>
         <ol class="items review-items">
+            <?php if ($review_image):?>
+                <div class="all-review-images">
+                    <div class="all-review-grid" id="lightgallery">
+                        <?php $review_image1 = call_user_func_array('array_merge', $review_image) ?>
+                        <?php foreach ($review_image1 as $img){?>
+                            <?php $h = searchForId($img,$review_image)?>
+                            <a href="<?= rtrim($directoryPath, '/') . $img; ?>" title="" id="<?= $h;?>" >
+                                <div class="all-review-photo" style="background-image: url('<?= rtrim($directoryPath, '/') . $img; ?>')"></div>
+                            </a>
+                        <?php } ?>
+                    </div>
+                </div>
+            <?php endif ?>
             <?php foreach ($_items as $_review) : ?>
+                <div class="no-display image_content_<?= $_review->getId() ?>">
+                    <div class="image-content-title"> <?= $block->escapeHtml($_review->getTitle()) ?></div>
+                    <p><?= /* @noEscape */nl2br($block->escapeHtml($_review->getDetail())) ?></p>
+                </div>
                 <li class="item review-item">
-                    <div class="adrn-review-title" itemprop="name">
+                    <div class="adrn-review-title " itemprop="name">
                         <?= $block->escapeHtml($_review->getTitle()) ?>
                     </div>
                     <?php if (count($_review->getRatingVotes())) : ?>
-                        <div class="adrn-review-ratings">
-
+                        <div class="adrn-review-ratings rating_<?= $_review->getId()?>">
                             <?php foreach ($_review->getRatingVotes() as $_vote) : ?>
                                 <?php
                                 $voteAvg += $_vote->getValue();
@@ -119,6 +138,16 @@ $voteAvg = 0;
                         <?= /* @noEscape */
                         nl2br($block->escapeHtml($_review->getDetail())) ?>
                     </div>
+                    <?php if ($_review->getImage()): ?>
+                        <div class="review-add-photo-box">
+                            <?php $images = $_review->getImage(); ?>
+                            <?php foreach (explode(',', $images) as $img) { ?>
+                                <a href="<?= rtrim($directoryPath, '/') . $img; ?>" id="<?= $_review->getId()?>">
+                                    <div class="added-review-img" style="background-image: url('<?= rtrim($directoryPath, '/') . $img; ?>')"></div>
+                                </a>
+                            <?php } ?>
+                        </div>
+                    <?php endif; ?>
                     <div class="adrn-review-details">
                         <ul class="buyer-review">
                             <li><span class="review-details-label"><?= $block->escapeHtml(__('Review by')) ?></span>
@@ -151,8 +180,52 @@ $voteAvg = 0;
     </div>
 </div>
 <?php endif; ?>
+<script type="text/x-magento-init">
+    {
+        "#lightgallery": {
+            "lightGallery": {
+                "thumbnail":true,
+                "download" : false
+            }
+        }
+    }
+</script>
+<script type="text/x-magento-init">
+    {
+        ".review-add-photo-box": {
+            "lightGallery": {
+                "thumbnail":true,
+                "download" : false
+            }
+        }
+    }
+</script>
 <script>
-    require(['jquery'], function ($){
-        $("div.block.review-list").remove();
+    require(['jquery'],function ($) {
+        console.log('ej');
+        $('.all-review-grid a').each(function(index, element) {
+            var clickebtn = this.id;
+            var html = $('.adrn-review-ratings.rating_'+clickebtn).html();
+            html += $('.image_content_'+ clickebtn).html();
+            $(this).attr('data-sub-html',html)
+        });
+        $('.review-add-photo-box a').each(function(index, element) {
+            var clickebtn = this.id;
+            var html = $('.adrn-review-ratings.rating_'+clickebtn).html();
+            html += $('.image_content_'+ clickebtn).html();
+            $(this).attr('data-sub-html',html)
+        });
     });
 </script>
+<?php
+function searchForId($id, $array) {
+    foreach ($array as $key => $val) {
+        foreach ($val as $valId){
+            if ($valId === $id) {
+                return $key;
+            }
+        }
+    }
+    return null;
+}
+?>

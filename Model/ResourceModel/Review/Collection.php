@@ -22,7 +22,7 @@ class Collection extends \Magento\Review\Model\ResourceModel\Review\Collection
         $this->getSelect()->join(
             ['details' => $this->getReviewDetailTable()],
             'main_table.review_id = details.review_id',
-            ['detail_id', 'title', 'detail', 'nickname', 'customer_id', 'admin_reply']
+            ['detail_id', 'title', 'detail', 'nickname', 'customer_id', 'admin_reply', 'image']
         );
         return $this;
     }
